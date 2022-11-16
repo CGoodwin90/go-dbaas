@@ -79,7 +79,7 @@ services:
       - '9200'
 
   mongodb:
-    image: uselagoon/mongo:latest
+    image: testlagoon/mongo-4:pr-120
     labels:
       lagoon.type: mongo
     ports:
