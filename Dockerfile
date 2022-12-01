@@ -11,15 +11,16 @@ RUN go build && chmod +x ./go-dbaas
 ENV MARIADB_PASSWORD=lagoon \
 MARIADB_USERNAME=lagoon \
 MARIADB_DATABASE=lagoon \
-MARIADB_HOST=mariadb \
+MARIADB_HOST=mariadb-test \
 POSTGRES_USERNAME=lagoon \
 POSTGRES_PASSWORD=lagoon \
 POSTGRES_DATABASE=lagoon \
 POSTGRES_HOST=postgres \
 SOLR_HOST=solr \
 REDIS_HOST=redis \
-OPENSEARCH_HOST=opensearch-node \
-MONGODB_HOST=mongodb 
+OPENSEARCH_HOST=opensearch \
+MONGO_HOST=mongo \
+MONGO_DATABASE=lagoon 
 
 EXPOSE 3000
 
