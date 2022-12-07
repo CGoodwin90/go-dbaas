@@ -7,40 +7,23 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
 
 	_ "github.com/lib/pq"
 )
 
 var (
-	postgresUser            = os.Getenv("POSTGRES_USERNAME")
-	postgresPassword        = os.Getenv("POSTGRES_PASSWORD")
-	postgresDB              = os.Getenv("POSTGRES_DATABASE")
-	postgresHost            = os.Getenv("POSTGRES_HOST")
-	postgres11              = "postgres-11"
-	postgres12              = "postgres-12"
-	postgres13              = "postgres-13"
-	postgresSSL             = "disable"
-	postgresConnectionStr   = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s", postgresUser, postgresPassword, postgresDB, postgresSSL, postgresHost)
-	postgres11ConnectionStr = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s", postgresUser, postgresPassword, postgresDB, postgresSSL, postgres11)
-	postgres12ConnectionStr = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s", postgresUser, postgresPassword, postgresDB, postgresSSL, postgres12)
-	postgres13ConnectionStr = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s", postgresUser, postgresPassword, postgresDB, postgresSSL, postgres13)
-	postgresVersion         string
+	postgresUser     = os.Getenv("POSTGRES_USERNAME")
+	postgresPassword = os.Getenv("POSTGRES_PASSWORD")
+	postgresDB       = os.Getenv("POSTGRES_DATABASE")
+	postgresSSL      = "disable"
+	postgresVersion  string
 )
 
 func postgresHandler(w http.ResponseWriter, r *http.Request) {
-	time.Sleep(1 * time.Second)
-	postgresRoute := r.URL.Path
-	switch postgresRoute {
-	case "/postgres":
-		fmt.Fprintf(w, dbConnectorPairs(postgresDBConnector(postgresConnectionStr), postgresVersion))
-	case "/postgres-11":
-		fmt.Fprintf(w, dbConnectorPairs(postgresDBConnector(postgres11ConnectionStr), postgresVersion))
-	case "/postgres-12":
-		fmt.Fprintf(w, dbConnectorPairs(postgresDBConnector(postgres12ConnectionStr), postgresVersion))
-	case "/postgres-13":
-		fmt.Fprintf(w, dbConnectorPairs(postgresDBConnector(postgres13ConnectionStr), postgresVersion))
-	}
+	postgresPath := r.URL.Path
+	postgresRoute := strings.ReplaceAll(postgresPath, "/", "")
+	postgresConnectionStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s", postgresUser, postgresPassword, postgresDB, postgresSSL, postgresRoute)
+	fmt.Fprintf(w, dbConnectorPairs(postgresDBConnector(postgresConnectionStr), postgresVersion))
 }
 
 func postgresDBConnector(connectionString string) map[string]string {
@@ -54,7 +37,7 @@ func postgresDBConnector(connectionString string) map[string]string {
 	createTable := "CREATE TABLE IF NOT EXISTS env(env_key text, env_value text)"
 	_, err = db.Exec(createTable)
 	if err != nil {
-		panic(err.Error())
+		log.Print(err)
 	}
 
 	query := "INSERT INTO env(env_key, env_value) VALUES ($1, $2)"
@@ -63,7 +46,7 @@ func postgresDBConnector(connectionString string) map[string]string {
 		pair := strings.SplitN(e, "=", 2)
 		_, err := db.Exec(query, pair[0], pair[1])
 		if err != nil {
-			panic(err.Error())
+			log.Print(err)
 		}
 	}
 

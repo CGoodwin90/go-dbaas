@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -58,7 +59,7 @@ func mongoConnector() string {
 	}
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI))
 	if err != nil {
-		panic(err)
+		log.Print(err)
 	}
 
 	envCollection := client.Database(mongoDB).Collection("env-vars")
@@ -66,7 +67,7 @@ func mongoConnector() string {
 	deleteFilter := bson.D{{}}
 	_, err = envCollection.DeleteMany(context.TODO(), deleteFilter)
 	if err != nil {
-		panic(err)
+		log.Print(err)
 	}
 
 	environmentVariables := []interface{}{}
@@ -76,19 +77,19 @@ func mongoConnector() string {
 		bsonData := bson.D{{"Key", pair[0]}, {"value", pair[1]}}
 		environmentVariables = append(environmentVariables, bsonData)
 		if err != nil {
-			panic(err.Error())
+			log.Print(err)
 		}
 	}
 
 	_, err = envCollection.InsertMany(context.TODO(), environmentVariables)
 	if err != nil {
-		panic(err)
+		log.Print(err)
 	}
 	filter := bson.D{{"Key", primitive.Regex{Pattern: "LAGOON", Options: ""}}}
 	cursor, _ := envCollection.Find(context.TODO(), filter, options.Find().SetProjection(bson.M{"_id": 0}))
 	var docs []bson.M
 	if err = cursor.All(context.TODO(), &docs); err != nil {
-		panic(err)
+		log.Print(err)
 	}
 
 	mongoOutput := cleanMongoOutput(docs)

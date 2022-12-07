@@ -14,10 +14,10 @@ type funcType func() map[string]string
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{mariadb:mariadb|mariadb-(?:10.4|10.5)$}", mariadbHandler)
-	r.HandleFunc("/{postgres:postgres|postgres-(?:11|12|13)$}", postgresHandler)
-	r.HandleFunc("/{redis:redis|redis-5}", redisHandler)
-	r.HandleFunc("/{solr:solr|solr-7}", solrHandler)
+	r.HandleFunc("/{mariadb:mariadb-.*}", mariadbHandler)
+	r.HandleFunc("/{postgres:postgres-.*}", postgresHandler)
+	r.HandleFunc("/{redis:redis-.*}", redisHandler)
+	r.HandleFunc("/{solr:solr-.*}", solrHandler)
 	r.HandleFunc("/mongo", mongoHandler)
 	r.HandleFunc("/opensearch", opensearchHandler)
 	r.HandleFunc("/", handleReq)

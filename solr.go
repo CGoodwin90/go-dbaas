@@ -11,21 +11,11 @@ import (
 	"github.com/vanng822/go-solr/solr"
 )
 
-var (
-	solrHost           = os.Getenv("SOLR_HOST")
-	solr7              = "solr-7"
-	solrConnectionStr  = fmt.Sprintf("http://%s:8983/solr", solrHost)
-	solr7ConnectionStr = fmt.Sprintf("http://%s:8983/solr", solr7)
-)
-
 func solrHandler(w http.ResponseWriter, r *http.Request) {
-	solrRoute := r.URL.Path
-	switch solrRoute {
-	case "/solr":
-		fmt.Fprintf(w, convertSolrDoc(solrConnector(solrConnectionStr), solrHost))
-	case "/solr-7":
-		fmt.Fprintf(w, convertSolrDoc(solrConnector(solr7ConnectionStr), solr7))
-	}
+	solrPath := r.URL.Path
+	solrRoute := strings.ReplaceAll(solrPath, "/", "")
+	solrConnectionStr := fmt.Sprintf("http://%s:8983/solr", solrRoute)
+	fmt.Fprintf(w, convertSolrDoc(solrConnector(solrConnectionStr), solrRoute))
 }
 
 func convertSolrDoc(d []solr.Document, version string) string {
@@ -54,7 +44,7 @@ func solrConnector(connectionString string) []solr.Document {
 		pair := strings.SplitN(e, "=", 2)
 		d.Set(pair[0], pair[1])
 		if err != nil {
-			panic(err.Error())
+			log.Print(err)
 		}
 	}
 	documents := []solr.Document{}

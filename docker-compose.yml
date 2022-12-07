@@ -14,9 +14,6 @@ services:
       lagoon.type: basic
     ports:
       - '3000:3000'
-    depends_on:
-      - mariadb
-      - postgres
     container_name: go-web
     environment:
       - LAGOON_TEST_VAR=test
@@ -37,21 +34,21 @@ services:
     ports:
       - '3306'
 
-  mariadb:
+  mariadb-10.6:
     image: uselagoon/mariadb-10.6
     labels:
       lagoon.type: mariadb
     ports:
       - '3306'
 
-  mongo:
+  mongo-4:
     image: uselagoon/mongo:latest
     labels:
       lagoon.type: mongo
     ports:
       - '27017'
 
-  opensearch:
+  opensearch-2:
     image: uselagoon/opensearch-2:latest
     environment:
     - cluster.name=opensearch-cluster
@@ -95,7 +92,7 @@ services:
     ports:
       - '5432'
 
-  postgres:
+  postgres-14:
     image: uselagoon/postgres-14
     labels:
       lagoon.type: postgres
@@ -109,7 +106,7 @@ services:
     ports:
       - '6379'
 
-  redis:
+  redis-6:
     image: uselagoon/redis-6
     labels:
       lagoon.type: redis
@@ -128,7 +125,7 @@ services:
       - solr-precreate
       - mycore
 
-  solr:
+  solr-8:
     image: uselagoon/solr-8
     labels:
       lagoon.type: solr

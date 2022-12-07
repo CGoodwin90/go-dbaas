@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -11,21 +12,14 @@ import (
 )
 
 var (
-	ctx                 = context.Background()
-	redisHost           = os.Getenv("REDIS_HOST")
-	redis5              = "redis-5"
-	redisConnectionStr  = fmt.Sprintf("%s:6379", redisHost)
-	redis5ConnectionStr = fmt.Sprintf("%s:6379", redis5)
+	ctx = context.Background()
 )
 
 func redisHandler(w http.ResponseWriter, r *http.Request) {
-	redisRoute := r.URL.Path
-	switch redisRoute {
-	case "/redis":
-		fmt.Fprintf(w, redisConnector(redisConnectionStr, redisHost))
-	case "/redis-5":
-		fmt.Fprintf(w, redisConnector(redis5ConnectionStr, redis5))
-	}
+	redisPath := r.URL.Path
+	redisRoute := strings.ReplaceAll(redisPath, "/", "")
+	redisConnectionStr := fmt.Sprintf("%s:6379", redisRoute)
+	fmt.Fprintf(w, redisConnector(redisConnectionStr, redisRoute))
 }
 
 func cleanRedisOutput(r *redis.StringCmd) string {
@@ -46,7 +40,7 @@ func redisConnector(connectionString string, version string) string {
 		pair := strings.SplitN(e, "=", 2)
 		err := client.Set(ctx, pair[0], pair[1], 0).Err()
 		if err != nil {
-			panic(err)
+			log.Print(err)
 		}
 	}
 
