@@ -1,7 +1,8 @@
 version: '2'
 
 volumes:
-  data:
+  solrData:
+  solrData7:
   opensearch-data1:
 
 services:
@@ -14,7 +15,7 @@ services:
     ports:
       - '3000:3000'
     depends_on:
-      - mariadb-test
+      - mariadb
       - postgres
     container_name: go-web
     environment:
@@ -22,38 +23,33 @@ services:
       - LAGOON_GIT_SHA=SHA256
       - LAGOON_ENV=Prod
       
-  mariadb-test:
+  mariadb-10.4:
+    image: uselagoon/mariadb-10.4
+    labels:
+      lagoon.type: mariadb
+    ports:
+      - '3306'
+  
+  mariadb-10.5:
+    image: uselagoon/mariadb-10.5
+    labels:
+      lagoon.type: mariadb
+    ports:
+      - '3306'
+
+  mariadb:
     image: uselagoon/mariadb-10.6
     labels:
       lagoon.type: mariadb
     ports:
       - '3306'
 
-  postgres:
-    image: uselagoon/postgres-14
+  mongo:
+    image: uselagoon/mongo:latest
     labels:
-      lagoon.type: postgres
+      lagoon.type: mongo
     ports:
-      - '5432'
-
-  solr:
-    image: uselagoon/solr-8
-    labels:
-      lagoon.type: solr
-    ports:
-     - "8983"
-    volumes:
-      - data:/var/solr
-    command:
-      - solr-precreate
-      - mycore
-
-  redis:
-    image: uselagoon/redis-6
-    labels:
-      lagoon.type: redis
-    ports:
-      - '6379'
+      - '27017'
 
   opensearch:
     image: uselagoon/opensearch-2:latest
@@ -78,9 +74,69 @@ services:
     ports:
       - '9200'
 
-  mongo:
-    image: uselagoon/mongo:latest
+  postgres-11:
+    image: uselagoon/postgres-11
     labels:
-      lagoon.type: mongo
+      lagoon.type: postgres
     ports:
-      - '27017'
+      - '5432'
+
+  postgres-12:
+    image: uselagoon/postgres-12
+    labels:
+      lagoon.type: postgres
+    ports:
+      - '5432'
+
+  postgres-13:
+    image: uselagoon/postgres-13
+    labels:
+      lagoon.type: postgres
+    ports:
+      - '5432'
+
+  postgres:
+    image: uselagoon/postgres-14
+    labels:
+      lagoon.type: postgres
+    ports:
+      - '5432'
+
+  redis-5:
+    image: uselagoon/redis-5
+    labels:
+      lagoon.type: redis
+    ports:
+      - '6379'
+
+  redis:
+    image: uselagoon/redis-6
+    labels:
+      lagoon.type: redis
+    ports:
+      - '6379'
+
+  solr-7:
+    image: uselagoon/solr-7
+    labels:
+      lagoon.type: solr
+    ports:
+     - "8983"
+    volumes:
+      - solrData7:/var/solr
+    command:
+      - solr-precreate
+      - mycore
+
+  solr:
+    image: uselagoon/solr-8
+    labels:
+      lagoon.type: solr
+    ports:
+     - "8983"
+    volumes:
+      - solrData:/var/solr
+    command:
+      - solr-precreate
+      - mycore
+
