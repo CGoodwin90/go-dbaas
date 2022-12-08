@@ -23,14 +23,14 @@ services:
   mariadb-10-4:
     image: uselagoon/mariadb-10.4
     labels:
-      lagoon.type: mariadb
+      lagoon.type: mariadb-single
     ports:
       - '3306'
   
   mariadb-10-5:
     image: uselagoon/mariadb-10.5
     labels:
-      lagoon.type: mariadb
+      lagoon.type: mariadb-single
     ports:
       - '3306'
 
@@ -74,21 +74,21 @@ services:
   postgres-11:
     image: uselagoon/postgres-11
     labels:
-      lagoon.type: postgres
+      lagoon.type: postgres-single
     ports:
       - '5432'
 
   postgres-12:
     image: uselagoon/postgres-12
     labels:
-      lagoon.type: postgres
+      lagoon.type: postgres-single
     ports:
       - '5432'
 
   postgres-13:
     image: uselagoon/postgres-13
     labels:
-      lagoon.type: postgres
+      lagoon.type: postgres-single
     ports:
       - '5432'
 
