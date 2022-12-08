@@ -6,7 +6,7 @@ volumes:
   opensearch-data1:
 
 services:
-  web:
+  web.test:
     build:
       context: .
       dockerfile: Dockerfile
