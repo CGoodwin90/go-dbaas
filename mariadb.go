@@ -26,7 +26,7 @@ func mariadbHandler(w http.ResponseWriter, r *http.Request) {
 	localRoute, lagoonRoute := cleanRoute(mariadbPath)
 	lagoonUsername := os.Getenv(fmt.Sprintf("%s_USERNAME", lagoonRoute))
 	lagoonPassword := os.Getenv(fmt.Sprintf("%s_PASSWORD", lagoonRoute))
-	lagoonDatabase := os.Getenv(fmt.Sprintf("%s_PASSWORD", lagoonRoute))
+	lagoonDatabase := os.Getenv(fmt.Sprintf("%s_DATABASE", lagoonRoute))
 	lagoonHost := os.Getenv(fmt.Sprintf("%s_HOST", lagoonRoute))
 
 	if localCheck != "" {
