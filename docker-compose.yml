@@ -20,21 +20,21 @@ services:
       - LAGOON_GIT_SHA=SHA256
       - LAGOON_ENV=Prod
       
-  mariadb-10.4:
+  mariadb-10-4:
     image: uselagoon/mariadb-10.4
     labels:
       lagoon.type: mariadb
     ports:
       - '3306'
   
-  mariadb-10.5:
+  mariadb-10-5:
     image: uselagoon/mariadb-10.5
     labels:
       lagoon.type: mariadb
     ports:
       - '3306'
 
-  mariadb-10.6:
+  mariadb-10-6:
     image: uselagoon/mariadb-10.6
     labels:
       lagoon.type: mariadb
