@@ -21,7 +21,8 @@ var (
 
 func mariadbHandler(w http.ResponseWriter, r *http.Request) {
 	mariadbPath := r.URL.Path
-	mariadbRoute := strings.ReplaceAll(mariadbPath, "/", "")
+	cleanRoute := strings.ReplaceAll(mariadbPath, "/", "")
+	mariadbRoute := strings.ReplaceAll(cleanRoute, "10.", "10-")
 	mariadbConnectionStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", mariadbUser, mariadbPassword, mariadbRoute, mariadbPort, mariadb)
 	fmt.Fprintf(w, dbConnectorPairs(mariadbConnector(mariadbConnectionStr), mariadbVersion))
 }
