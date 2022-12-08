@@ -23,6 +23,13 @@ func mariadbHandler(w http.ResponseWriter, r *http.Request) {
 	mariadbPath := r.URL.Path
 	cleanRoute := strings.ReplaceAll(mariadbPath, "/", "")
 	mariadbRoute := strings.ReplaceAll(cleanRoute, "10.", "10-")
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		dynamicHost := fmt.Sprintf("%s_HOST", cleanRoute)
+		if pair[0] == dynamicHost {
+			mariadbRoute = pair[0]
+		}
+	}
 	mariadbConnectionStr := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", mariadbUser, mariadbPassword, mariadbRoute, mariadbPort, mariadb)
 	fmt.Fprintf(w, dbConnectorPairs(mariadbConnector(mariadbConnectionStr), mariadbVersion))
 }
