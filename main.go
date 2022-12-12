@@ -5,9 +5,14 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
+)
+
+var (
+	localCheck = os.Getenv("LAGOON_ENVIRONMENT")
 )
 
 type funcType func() map[string]string
@@ -51,4 +56,12 @@ func connectorKeyValues(values []string) string {
 		}
 	}
 	return b.String()
+}
+
+func cleanRoute(basePath string) (string, string) {
+	cleanRoute := strings.ReplaceAll(basePath, "/", "")
+	localRoute := strings.ReplaceAll(cleanRoute, "10.", "10-")
+	replaceHyphen := strings.ReplaceAll(localRoute, "-", "_")
+	lagoonRoute := strings.ToUpper(replaceHyphen)
+	return localRoute, lagoonRoute
 }

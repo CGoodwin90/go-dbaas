@@ -17,18 +17,27 @@ import (
 )
 
 var (
-	mongoUser     = os.Getenv("MONGO_USERNAME")
-	mongoPassword = os.Getenv("MONGO_PASSWORD")
-	mongoHost     = os.Getenv("MONGO_HOST")
-	mongoDB       = os.Getenv("MONGO_DATABASE")
-	mongoPort     = 27017
-	mongoUserURI  = fmt.Sprintf("mongodb://%s:%s@%s:%d/%s", mongoUser, mongoPassword, mongoHost, mongoPort, mongoDB)
-	mongoLocalURI = fmt.Sprintf("mongodb://%s:%d", mongoHost, mongoPort)
-	mongoURI      string
+	mongoPort          = 27017
+	mongoDB            = os.Getenv("MONGO_DATABASE")
+	mongoVersion       string
+	mongoConnectionStr string
 )
 
 func mongoHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, mongoConnector())
+	mongoPath := r.URL.Path
+	localRoute, lagoonRoute := cleanRoute(mongoPath)
+	lagoonUsername := os.Getenv(fmt.Sprintf("%s_USERNAME", lagoonRoute))
+	lagoonPassword := os.Getenv(fmt.Sprintf("%s_PASSWORD", lagoonRoute))
+	lagoonDatabase := os.Getenv(fmt.Sprintf("%s_DATABASE", lagoonRoute))
+	lagoonPort := os.Getenv(fmt.Sprintf("%s_PORT", lagoonRoute))
+	lagoonHost := os.Getenv(fmt.Sprintf("%s_HOST", lagoonRoute))
+
+	if localCheck != "" {
+		mongoConnectionStr = fmt.Sprintf("mongodb://%s:%s@%s:%d/%s", lagoonUsername, lagoonPassword, lagoonHost, lagoonPort, lagoonDatabase)
+	} else {
+		mongoConnectionStr = fmt.Sprintf("mongodb://%s:%d", localRoute, mongoPort)
+	}
+	fmt.Fprintf(w, mongoConnector(mongoConnectionStr))
 }
 
 func cleanMongoOutput(docs []primitive.M) string {
@@ -46,18 +55,13 @@ func cleanMongoOutput(docs []primitive.M) string {
 		v := strings.SplitN(value, " ", 2)
 		fmt.Fprintf(b, "\"%s=%s\"\n", v[0], v[1])
 	}
-	host := fmt.Sprintf(`"SERVICE_HOST=%s"`, mongoHost)
+	host := fmt.Sprintf(`"SERVICE_HOST=%s"`, mongoVersion)
 	mongoOutput := host + "\n" + b.String()
 	return mongoOutput
 }
 
-func mongoConnector() string {
-	if mongoUser != "" {
-		mongoURI = mongoUserURI
-	} else {
-		mongoURI = mongoLocalURI
-	}
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(mongoURI))
+func mongoConnector(connectionString string) string {
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionString))
 	if err != nil {
 		log.Print(err)
 	}
@@ -80,6 +84,12 @@ func mongoConnector() string {
 			log.Print(err)
 		}
 	}
+
+	var commandResult bson.M
+	command := bson.D{{"serverStatus", 1}}
+	_ = client.Database(mongoDB).RunCommand(context.TODO(), command).Decode(&commandResult)
+
+	mongoVersion = fmt.Sprintf("Mongo:%+v", commandResult["version"])
 
 	_, err = envCollection.InsertMany(context.TODO(), environmentVariables)
 	if err != nil {

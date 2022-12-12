@@ -12,17 +12,28 @@ import (
 )
 
 var (
-	postgresUser     = os.Getenv("POSTGRES_USERNAME")
-	postgresPassword = os.Getenv("POSTGRES_PASSWORD")
-	postgresDB       = os.Getenv("POSTGRES_DATABASE")
-	postgresSSL      = "disable"
-	postgresVersion  string
+	postgresUser          = os.Getenv("POSTGRES_USERNAME")
+	postgresPassword      = os.Getenv("POSTGRES_PASSWORD")
+	postgresDB            = os.Getenv("POSTGRES_DATABASE")
+	postgresSSL           = "disable"
+	postgresVersion       string
+	postgresConnectionStr string
 )
 
 func postgresHandler(w http.ResponseWriter, r *http.Request) {
 	postgresPath := r.URL.Path
-	postgresRoute := strings.ReplaceAll(postgresPath, "/", "")
-	postgresConnectionStr := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s", postgresUser, postgresPassword, postgresDB, postgresSSL, postgresRoute)
+	localRoute, lagoonRoute := cleanRoute(postgresPath)
+	lagoonUsername := os.Getenv(fmt.Sprintf("%s_USERNAME", lagoonRoute))
+	lagoonPassword := os.Getenv(fmt.Sprintf("%s_PASSWORD", lagoonRoute))
+	lagoonDatabase := os.Getenv(fmt.Sprintf("%s_DATABASE", lagoonRoute))
+	lagoonHost := os.Getenv(fmt.Sprintf("%s_HOST", lagoonRoute))
+
+	if localCheck != "" {
+		postgresConnectionStr = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s", lagoonUsername, lagoonPassword, lagoonDatabase, postgresSSL, lagoonHost)
+		fmt.Println(postgresConnectionStr)
+	} else {
+		postgresConnectionStr = fmt.Sprintf("user=%s password=%s dbname=%s sslmode=%s host=%s", postgresUser, postgresPassword, postgresDB, postgresSSL, localRoute)
+	}
 	fmt.Fprintf(w, dbConnectorPairs(postgresDBConnector(postgresConnectionStr), postgresVersion))
 }
 

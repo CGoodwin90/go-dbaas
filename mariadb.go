@@ -18,7 +18,6 @@ var (
 	mariadbPort          = 3306
 	mariadbVersion       string
 	mariadbConnectionStr string
-	localCheck           = os.Getenv("LAGOON_ENVIRONMENT")
 )
 
 func mariadbHandler(w http.ResponseWriter, r *http.Request) {
@@ -27,23 +26,15 @@ func mariadbHandler(w http.ResponseWriter, r *http.Request) {
 	lagoonUsername := os.Getenv(fmt.Sprintf("%s_USERNAME", lagoonRoute))
 	lagoonPassword := os.Getenv(fmt.Sprintf("%s_PASSWORD", lagoonRoute))
 	lagoonDatabase := os.Getenv(fmt.Sprintf("%s_DATABASE", lagoonRoute))
+	lagoonPort := os.Getenv(fmt.Sprintf("%s_PORT", lagoonRoute))
 	lagoonHost := os.Getenv(fmt.Sprintf("%s_HOST", lagoonRoute))
 
 	if localCheck != "" {
-		mariadbConnectionStr = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", lagoonUsername, lagoonPassword, lagoonHost, mariadbPort, lagoonDatabase)
-		fmt.Println(mariadbConnectionStr)
+		mariadbConnectionStr = fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", lagoonUsername, lagoonPassword, lagoonHost, lagoonPort, lagoonDatabase)
 	} else {
 		mariadbConnectionStr = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s", mariadbUser, mariadbPassword, localRoute, mariadbPort, mariadb)
 	}
 	fmt.Fprintf(w, dbConnectorPairs(mariadbConnector(mariadbConnectionStr), mariadbVersion))
-}
-
-func cleanRoute(basePath string) (string, string) {
-	cleanRoute := strings.ReplaceAll(basePath, "/", "")
-	localRoute := strings.ReplaceAll(cleanRoute, "10.", "10-")
-	replaceHyphen := strings.ReplaceAll(localRoute, "-", "_")
-	lagoonRoute := strings.ToUpper(replaceHyphen)
-	return localRoute, lagoonRoute
 }
 
 func mariadbConnector(connectionString string) map[string]string {
