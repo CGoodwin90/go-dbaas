@@ -18,9 +18,9 @@ import (
 
 var (
 	mongoPort          = 27017
-	mongoDB            = os.Getenv("MONGO_DATABASE")
 	mongoVersion       string
 	mongoConnectionStr string
+	database           string
 )
 
 func mongoHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,10 +34,12 @@ func mongoHandler(w http.ResponseWriter, r *http.Request) {
 
 	if localCheck != "" {
 		mongoConnectionStr = fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", lagoonUsername, lagoonPassword, lagoonHost, lagoonPort, lagoonDatabase)
+		database = lagoonDatabase
 	} else {
 		mongoConnectionStr = fmt.Sprintf("mongodb://%s:%d", localRoute, mongoPort)
+		database = os.Getenv("MONGO_DATABASE")
 	}
-	fmt.Fprintf(w, mongoConnector(mongoConnectionStr))
+	fmt.Fprintf(w, mongoConnector(mongoConnectionStr, database))
 }
 
 func cleanMongoOutput(docs []primitive.M) string {
@@ -60,13 +62,13 @@ func cleanMongoOutput(docs []primitive.M) string {
 	return mongoOutput
 }
 
-func mongoConnector(connectionString string) string {
+func mongoConnector(connectionString string, database string) string {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(connectionString))
 	if err != nil {
 		log.Print(err)
 	}
 
-	envCollection := client.Database(mongoDB).Collection("env-vars")
+	envCollection := client.Database(database).Collection("env-vars")
 
 	deleteFilter := bson.D{{}}
 	_, err = envCollection.DeleteMany(context.TODO(), deleteFilter)
@@ -87,7 +89,7 @@ func mongoConnector(connectionString string) string {
 
 	var commandResult bson.M
 	command := bson.D{{"serverStatus", 1}}
-	_ = client.Database(mongoDB).RunCommand(context.TODO(), command).Decode(&commandResult)
+	_ = client.Database(database).RunCommand(context.TODO(), command).Decode(&commandResult)
 
 	mongoVersion = fmt.Sprintf("Mongo:%+v", commandResult["version"])
 
