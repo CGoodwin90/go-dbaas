@@ -33,7 +33,7 @@ func mongoHandler(w http.ResponseWriter, r *http.Request) {
 	lagoonHost := os.Getenv(fmt.Sprintf("%s_HOST", lagoonRoute))
 
 	if localCheck != "" {
-		mongoConnectionStr = fmt.Sprintf("mongodb://%s:%s@%s:%d/%s", lagoonUsername, lagoonPassword, lagoonHost, lagoonPort, lagoonDatabase)
+		mongoConnectionStr = fmt.Sprintf("mongodb://%s:%s@%s:%s/%s", lagoonUsername, lagoonPassword, lagoonHost, lagoonPort, lagoonDatabase)
 	} else {
 		mongoConnectionStr = fmt.Sprintf("mongodb://%s:%d", localRoute, mongoPort)
 	}
