@@ -26,6 +26,7 @@ var (
 func mongoHandler(w http.ResponseWriter, r *http.Request) {
 	mongoPath := r.URL.Path
 	localRoute, lagoonRoute := cleanRoute(mongoPath)
+	mongoVersion = localRoute
 	lagoonUsername := os.Getenv(fmt.Sprintf("%s_USERNAME", lagoonRoute))
 	lagoonPassword := os.Getenv(fmt.Sprintf("%s_PASSWORD", lagoonRoute))
 	lagoonDatabase := os.Getenv(fmt.Sprintf("%s_DATABASE", lagoonRoute))
@@ -86,12 +87,6 @@ func mongoConnector(connectionString string, database string) string {
 			log.Print(err)
 		}
 	}
-
-	var commandResult bson.M
-	command := bson.D{{"serverStatus", 1}}
-	_ = client.Database(database).RunCommand(context.TODO(), command).Decode(&commandResult)
-
-	mongoVersion = fmt.Sprintf("Mongo:%+v", commandResult["version"])
 
 	_, err = envCollection.InsertMany(context.TODO(), environmentVariables)
 	if err != nil {
