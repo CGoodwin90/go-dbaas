@@ -66,8 +66,6 @@ services:
         hard: 65536
     volumes:
       - opensearch-data1:/usr/share/opensearch/data
-    labels:
-      lagoon.type: opensearch
     ports:
       - '9200'
 
